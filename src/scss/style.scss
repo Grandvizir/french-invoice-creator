@@ -1,6 +1,318 @@
-body
-{
-  background: green;
+body{
+  font-family: 'Helvetica', sans-serif;
+  height: 100vh;
   display: flex;
-  justify-content: baseline
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  span[role=button],label[role=button], i {
+    cursor: pointer;
+  }
+  h1{
+    font-weight: bold;
+    font-size: 20px;
+    margin: 15px 0;
+  }
+  form{
+    &.form-invoice-generator{
+      height: 80%;
+      width: 90%;
+      display: flex;
+      justify-content: space-between;
+      .invoice-infos,.preview-container{
+        padding: 15px;
+      }
+      .invoice-infos{
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        overflow: scroll;
+        h3{
+          font-weight: bold;
+        }
+        .separator{
+          margin : 0 0 1rem 0;
+          width: 60%;
+          align-self: center;
+        }
+        .file-infos{
+          display: flex;
+          justify-content: space-between;
+        }
+        .checkbox-container{
+          display: flex;
+          align-items: center;
+          p{
+            margin-left: 10px;
+            margin-bottom: unset;
+          }
+          label{
+            margin-bottom: unset;
+          }
+          .checker{
+            font-size: 20px;
+            display: block;
+            height: 1em;
+            width: 2.5em;
+            box-sizing: content-box;
+            padding: 0.2em;
+            border-radius: 0.25em;
+            transition: transform 0.4s ease;
+            cursor: pointer;
+          }
+          .checkmark{
+            width: 1em;
+            height: 1em;
+            transition: transform 0.4s ease;
+            transform: translateX(-.4em);
+            z-index: 5;
+            svg,div{
+              display: block;
+              background: white;
+              transform: translateX(.4em);
+              border-radius: 0.15em;
+              transition: 
+              background-color 0.4s ease,
+              transform calc(0.4s * 1.5) ease;
+              path{
+                stroke-dasharray: 90 90;
+                stroke-dashoffset: 90;
+                transition: stroke-dashoffset calc(0.4s / 3) linear calc(0.4s / 3);
+              }
+            }
+          }
+          .checkbox{
+            position: absolute;
+            top: 0;
+            left: 0;
+            visibility: hidden;
+            &:checked{
+              ~ .checkmark{
+                transform: translate(1.9em);
+                svg{
+                  background: #f2f2f2;
+                  transform: translate(-.4em);
+                  path{ stroke-dashoffset: 0; }
+                }
+              }
+            }
+          }
+          .check-bg{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            background: white;
+            z-index: 2;
+            &:before,
+            &:after{
+              content: "";
+              position: absolute;
+              top: 0;
+              left: 0;
+              height: 100%;
+              width: 100%;
+              border-radius: inherit;
+            }
+            &:after{
+              background-color: #585c5e;
+            }
+            &:before{
+              transition: transform var(--duration) ease;
+              transform: translateY(30%);
+              transform-origin: bottom center;
+              opacity: 0.2;
+              z-index: -1;
+            }
+          }
+          .checker.checker{
+            .check-bg::before{
+              transform: translateY(0) scale(0.8);
+            }
+          }
+          *,
+          *::before,
+          *::after{
+            box-sizing: border-box;
+            position: relative;
+          }
+        }
+        .add-elem{
+          margin-bottom: 1rem;
+        }
+        input[type=submit]{
+          display: none;
+        }
+      }
+      .separator{
+        border: grey solid 1px;
+      }
+      .preview-container{
+        flex-direction: column;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        width: 420px;
+        .preview{
+          position: relative;
+          border: black solid 1px;
+          border-radius: 3px;
+          width: 100%;
+          height: 594px;
+          padding: 20px;
+          .invoice-header{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            img{
+              width: 20%;
+            }
+            p{
+              font-size: 14px;
+              font-weight: bold;
+            }
+          }
+          .invoice-contact{
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 5%;
+            font-size: 10px;
+            .store-infos,.provider-infos{
+              display: flex;
+              flex-direction: column;
+              width: 40%;
+              .name{
+                font-weight: bold;
+              }
+              span{
+                margin: 1% 0;
+              }
+            }
+          }
+          .labels-container{
+            display: flex;
+            font-size: 10px;
+            margin: 10px 0;
+            justify-content: space-between;
+          }
+          .name-container{
+            font-size: 10px;
+          }
+          .invoice-body{
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 10px;
+            font-size: 10px;
+            .product{
+              display: flex;
+              justify-content: space-between;
+              line-height: 15px;
+              span{
+                min-height: 10px;
+                text-align: center;
+                padding: 2px;
+                &.description{
+                  width: 74%;
+                }
+                &.qty{
+                  width: 25%;
+                }
+              }
+              &:nth-child(odd){
+                span{
+                  background-color: #e6e6e6;
+                }
+              }
+              &:nth-child(even){
+                span{
+                  background-color: #cacaca;
+                }
+              }
+              &.label{
+                span{
+                  padding: 3px;
+                  background-color: black !important;
+                }
+                margin-bottom: 2px;
+                color: white;
+              }
+            }
+            .summ-ht,.summ-ttc{
+              display: flex;
+              justify-content: flex-end;
+              color: white;
+              text-align: center;
+              span{
+                padding: 3px;
+                background-color: black;
+                width: 25%;
+                margin-top: 2px;
+              }
+              .summ-label{
+                margin-right: 1%;
+              }
+            }
+          }
+          .comment{
+            font-size: 10px;
+            margin-top: 10%;
+          }
+          .invoice-footer{
+            font-size: 6px;
+            margin-bottom: 10px;
+            color: grey;
+            position: absolute;
+            bottom: 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            left: 0;
+          }
+        }
+        .save-buttons{
+          margin-top: 20px;
+        }
+      }
+    }
+  }
+}
+@media screen and (max-width : 950px){
+  body{
+    height: unset;
+    form{
+      &.form-invoice-generator{
+        width: 95%;
+        flex-direction: column;
+        align-items: center;
+        .invoice-infos{
+          order: 3;
+          width: unset;
+          .separator{
+            order: unset;
+          }
+          input[type=submit]{
+            display: block;
+          }
+        }
+        .separator{
+          order: 2;
+        }
+        .preview-container{
+          width: 350px;
+          order: 1;
+          .preview{
+            height: 524px;
+          }
+          .save-buttons{
+            display: none;
+          }
+        }
+      }
+    }
+  }
 }
