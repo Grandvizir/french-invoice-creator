@@ -37,10 +37,6 @@ const addressSenderInput = invoiceGeneratorInvoice.querySelector('#sender-addres
 const zipSenderInput = invoiceGeneratorInvoice.querySelector('#sender-zip')
 const citySenderInput = invoiceGeneratorInvoice.querySelector('#sender-city')
 const countrySenderInput = invoiceGeneratorInvoice.querySelector('#sender-country')
-const fileContainer = invoiceGeneratorInvoice.querySelector('.file-infos')
-const sizeSpan = fileContainer.querySelector('.size')
-const nameSpan = fileContainer.querySelector('.name')
-const logoInput = invoiceGeneratorInvoice.querySelector('#logo')
 
 // Invoice Preview
 
@@ -64,10 +60,17 @@ const summHT = previewInvoice.querySelector('.summ-ht .summ')
 const summTTCContainer = previewInvoice.querySelector('.summ-ttc')
 const summTTC = summTTCContainer.querySelector('.summ')
 const commentInvoice = previewInvoice.querySelector('.comment span')
-const logoInvoice = previewInvoice.querySelector('img')
+const logoContainer = previewInvoice.querySelector('.img')
+const imgContainer = previewInvoice.querySelector('.invoice-header .img')
+const fileContainer = invoiceGeneratorInvoice.querySelector('.file-infos')
+const sizeSpan = fileContainer.querySelector('.size')
+const nameSpan = fileContainer.querySelector('.name')
+const logoInput = invoiceGeneratorInvoice.querySelector('#logo')
+
 /**
 *   Functions
 */
+
 const showInputFromSelect = (select, elemToDisplay, array) => {
   if (array.includes(select.value)) {
     elemToDisplay.classList.remove('d-none')
@@ -93,6 +96,7 @@ const calcHT = (ttc, tva) => {
   ttc = parseFloat(ttc)
   tva = parseFloat(tva)
   return ttc / (1+tva)
+
 }
 const returnTva = () => {
   if (tvaSelectInput.value == 'other') {
@@ -108,8 +112,6 @@ const addElemToForm = () => {
   // set elem number
   let specificNumber = parseInt(numberOfElem) + 1
   elemForm.querySelector('.disabled').innerHTML = specificNumber
-  elemForm.querySelector('.col-8 input').dataset.id = 'elem-name-'+ specificNumber
-  elemForm.querySelector('.col-2 input').dataset.id = 'elem-qty-'+ specificNumber
   // append
   elemContainerForm.appendChild(elemForm)
   productContainerInvoice.appendChild(elemInvoice)
@@ -120,8 +122,8 @@ const addElemToForm = () => {
     elemInvoice.remove()
     sortElemNumber()
   })
-  let nameInput = elemForm.querySelector('.form-group:nth-child(2) input')
-  let qtyInput = elemForm.querySelector('.form-group:nth-child(3) input')
+  let nameInput = elemForm.querySelector('input[type=text]')
+  let qtyInput = elemForm.querySelector('input[type=number]')
   nameInput.addEventListener('input', () => {
     elemInvoice.querySelector('.description').innerHTML = nameInput.value
   })
@@ -135,9 +137,18 @@ const sortElemNumber = () => {
   for (const key in elems) {
     let specificNumber = parseInt(key) + 1
     elems[key].querySelector('.disabled').innerHTML = specificNumber
-    elems[key].querySelector('.col-8 input').dataset.id = 'elem-name-'+ specificNumber
-    elems[key].querySelector('.col-2 input').dataset.id = 'elem-qty-'+ specificNumber
   }
+}
+const save = (elemSelector, name,button, quality = 3 ) => {
+  let element = document.querySelector(elemSelector)
+  html2canvas(element, {scale: quality, allowTaint : true})
+  .then(canvas => {
+    let pdf = new jsPDF('p', 'mm', 'a4')
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', -1, -1, 212, 299)
+    pdf.save(name+'.pdf')
+    button.classList.remove('d-none')
+    button.nextElementSibling.classList.add('d-none')
+  })
 }
 const validFileType = (file) => {
   const fileTypes = [
@@ -166,14 +177,6 @@ const returnFileSize = (number) => {
     return (number/1048576).toFixed(1) + ' Mo';
   }
 }
-const save = (elemSelector, name, quality = 3) => {
-  html2canvas(document.querySelector(elemSelector), {scale: quality})
-  .then(canvas => {
-    let pdf = new jsPDF('p', 'mm', 'a4')
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, 297)
-    pdf.save(name+'.pdf')
-  })
-}
 /**
 *   Dom Generation Variables
 */
@@ -185,14 +188,6 @@ const input = document.createElement('input')
 input.classList.add('form-control')
 const formRow = div.cloneNode()
 formRow.classList.add('form-row')
-const elemNumberContainer = div.cloneNode()
-elemNumberContainer.classList.add('form-group', 'col-1')
-const elemNameContainer = div.cloneNode()
-elemNameContainer.classList.add('form-group', 'col-8')
-const elemQtyContainer = div.cloneNode()
-elemQtyContainer.classList.add('form-group', 'col-2')
-const elemDeleteContainer = div.cloneNode()
-elemDeleteContainer.classList.add('form-group', 'col-1')
 const nameInput = input.cloneNode()
 nameInput.setAttribute('type', 'text')
 nameInput.setAttribute('placeholder', 'Elément')
@@ -205,14 +200,10 @@ const elemNumberP = document.createElement('p')
 elemNumberP.classList.add('btn', 'btn-outline-info', 'disabled')
 const deleteButton = document.createElement('i')
 deleteButton.classList.add('btn', 'btn-danger', 'fa-trash-alt', 'fas')
-elemNumberContainer.appendChild(elemNumberP)
-elemNameContainer.appendChild(nameInput)
-elemQtyContainer.appendChild(qtyInput)
-elemDeleteContainer.appendChild(deleteButton)
-formRow.appendChild(elemNumberContainer)
-formRow.appendChild(elemNameContainer)
-formRow.appendChild(elemQtyContainer)
-formRow.appendChild(elemDeleteContainer)
+formRow.appendChild(elemNumberP)
+formRow.appendChild(nameInput)
+formRow.appendChild(qtyInput)
+formRow.appendChild(deleteButton)
 // Invoice
 const span = document.createElement('span')
 const productRow = div.cloneNode()
@@ -260,9 +251,9 @@ $(dateInput).daterangepicker({
   }
 })
 // Init 
-dateInvoice.innerHTML = `Date : ${dateInput.value}`
+dateInvoice.innerHTML = `Date :  ${dateInput.value}`
 $(dateInput).on('apply.daterangepicker', function(ev, picker) {
-  dateInvoice.innerHTML = `Date : ${picker.endDate.format('DD/MM/YYYY')}`
+  dateInvoice.innerHTML = `Date :  ${picker.endDate.format('DD/MM/YYYY')}`
 });
 
 
@@ -290,14 +281,30 @@ tvaCheckbox.addEventListener('change', () => {
 })
 // Calc tva or ht
 totalTTCInput.addEventListener('input', () => {
-  totalHTInput.value = calcHT(totalTTCInput.value, returnTva()).toFixed(2)
-  summHT.innerHTML = `${totalHTInput.value} €`
-  summTTC.innerHTML = `${totalTTCInput.value} €`
+  if (isNaN(returnTva())) {
+    $(tvaOtherInput).popover('enable')
+    $(tvaOtherInput).popover('show')
+    totalHTInput.value = 0
+    totalTTCInput.value = 0
+  }
+  else{
+    totalHTInput.value = calcHT(totalTTCInput.value, returnTva()).toFixed(2)
+    summHT.innerHTML = `${totalHTInput.value} €`
+    summTTC.innerHTML = `${totalTTCInput.value} €`
+  }
 })
 totalHTInput.addEventListener('input', () => {
-  totalTTCInput.value = calcTTC(totalHTInput.value, returnTva()).toFixed(2)
-  summHT.innerHTML = `${totalHTInput.value} €`
-  summTTC.innerHTML = `${totalTTCInput.value} €`
+  if (isNaN(returnTva())) {
+    $(tvaOtherInput).popover('enable')
+    $(tvaOtherInput).popover('show')
+    totalHTInput.value = 0
+    totalTTCInput.value = 0
+  }
+  else{
+    totalTTCInput.value = calcTTC(totalHTInput.value, returnTva()).toFixed(2)
+    summHT.innerHTML = `${totalHTInput.value} €`
+    summTTC.innerHTML = `${totalTTCInput.value} €`
+  }
 })
 
 // Add input value to preview
@@ -377,6 +384,26 @@ addElemButton.addEventListener('click', () => {
   addElemToForm(numberOfElem)
 })
 
+invoiceGeneratorInvoice.addEventListener('submit', (e) => {
+  e.preventDefault()
+  if (elemContainerForm.querySelector('.form-row')) {
+    saveInvoiceButton.classList.add('d-none')
+    saveInvoiceButton.nextElementSibling.classList.remove('d-none')
+    document.body.scrollTop = 0 // For Safari
+    document.documentElement.scrollTop = 0 // For Chrome, Firefox, IE and Opera
+    setTimeout(() => {
+      save('.preview-container .preview',numberInvoiceInput.value, saveInvoiceButton)
+    }, 2500);
+
+  }
+  else{
+    $(addElemButton).popover('enable')
+    $(addElemButton).popover('show')
+    setTimeout(() => {
+    $(addElemButton).popover('hide')
+    }, 2000);
+  }
+})
 /**
  *   Logo
  */
@@ -386,26 +413,12 @@ logoInput.addEventListener('change', () => {
       fileContainer.classList.remove('d-none')
       nameSpan.innerHTML = logoInput.files[0].name
       sizeSpan.innerHTML = returnFileSize(logoInput.files[0].size)
-      logoInvoice.src = window.URL.createObjectURL(logoInput.files[0]);
+      let img = new Image()
+      logoContainer.appendChild(img)
+      img.src = window.URL.createObjectURL(logoInput.files[0]);
     }
   }
   else{
     fileContainer.classList.add('d-none')
-  }
-})
-
-invoiceGeneratorInvoice.addEventListener('submit', (e) => {
-  e.preventDefault()
-  if (elemContainerForm.querySelector('.form-row')) {
-    saveInvoiceButton.classList.add('d-none')
-    saveInvoiceButton.nextElementSibling.classList.remove('d-none')
-    save('.preview-container .preview',numberInvoiceInput.value)
-  }
-  else{
-    $(addElemButton).popover('enable')
-    $(addElemButton).popover('show')
-    setTimeout(() => {
-    $(addElemButton).popover('hide')
-    }, 2000);
   }
 })
