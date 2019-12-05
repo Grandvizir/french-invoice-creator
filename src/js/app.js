@@ -1,5 +1,17 @@
 /**
-*   Variables
+ * 
+ *    I. Variables
+ *    II. DOM Generation Variables
+ *    III. Functions 
+ *    IV. Date Range Picker
+ *    V. Add logo
+ *    VI. Preview Invoice
+ *    VII.Create Form
+ * 
+ */
+
+/**
+*   I. Variables
 */
 // Add invoice
 const invoiceGeneratorInvoice = document.querySelector('.form-invoice-generator')
@@ -37,6 +49,10 @@ const addressSenderInput = invoiceGeneratorInvoice.querySelector('#sender-addres
 const zipSenderInput = invoiceGeneratorInvoice.querySelector('#sender-zip')
 const citySenderInput = invoiceGeneratorInvoice.querySelector('#sender-city')
 const countrySenderInput = invoiceGeneratorInvoice.querySelector('#sender-country')
+const fileContainer = invoiceGeneratorInvoice.querySelector('.file-infos')
+const sizeSpan = fileContainer.querySelector('.size')
+const nameSpan = fileContainer.querySelector('.name')
+const logoInput = invoiceGeneratorInvoice.querySelector('#logo')
 
 // Invoice Preview
 
@@ -62,123 +78,9 @@ const summTTC = summTTCContainer.querySelector('.summ')
 const commentInvoice = previewInvoice.querySelector('.comment span')
 const logoContainer = previewInvoice.querySelector('.img')
 const imgContainer = previewInvoice.querySelector('.invoice-header .img')
-const fileContainer = invoiceGeneratorInvoice.querySelector('.file-infos')
-const sizeSpan = fileContainer.querySelector('.size')
-const nameSpan = fileContainer.querySelector('.name')
-const logoInput = invoiceGeneratorInvoice.querySelector('#logo')
 
 /**
-*   Functions
-*/
-
-const showInputFromSelect = (select, elemToDisplay, array) => {
-  if (array.includes(select.value)) {
-    elemToDisplay.classList.remove('d-none')
-  }
-  else{
-    elemToDisplay.classList.add('d-none')
-  }
-}
-const showInputFromCheckbox = (input, elemToDisplay) => {
-  if (input.checked) {
-    elemToDisplay.classList.remove('d-none')
-  }
-  else{
-    elemToDisplay.classList.add('d-none')
-  }
-}
-const calcTTC = (ht, tva) => {
-  ht = parseFloat(ht)
-  tva = 1 + parseFloat(tva)
-  return ht * tva
-}
-const calcHT = (ttc, tva) => {
-  ttc = parseFloat(ttc)
-  tva = parseFloat(tva)
-  return ttc / (1+tva)
-
-}
-const returnTva = () => {
-  if (tvaSelectInput.value == 'other') {
-    return parseFloat(tvaOtherInput.value) / 100
-  }
-  else{
-    return tvaSelectInput.value
-  }
-}
-const addElemToForm = () => {
-  let elemForm = formRow.cloneNode(true)
-  let elemInvoice = productRow.cloneNode(true)
-  // set elem number
-  let specificNumber = parseInt(numberOfElem) + 1
-  elemForm.querySelector('.disabled').innerHTML = specificNumber
-  // append
-  elemContainerForm.appendChild(elemForm)
-  productContainerInvoice.appendChild(elemInvoice)
-  // increment
-  numberOfElem++
-  elemForm.querySelector('i').addEventListener('click', () => {
-    elemForm.remove()
-    elemInvoice.remove()
-    sortElemNumber()
-  })
-  let nameInput = elemForm.querySelector('input[type=text]')
-  let qtyInput = elemForm.querySelector('input[type=number]')
-  nameInput.addEventListener('input', () => {
-    elemInvoice.querySelector('.description').innerHTML = nameInput.value
-  })
-  qtyInput.addEventListener('input', () => {
-    elemInvoice.querySelector('.qty').innerHTML = qtyInput.value
-  })
-}
-const sortElemNumber = () => {
-  numberOfElem--
-  let elems = [...elemContainerForm.querySelectorAll('.form-row')]
-  for (const key in elems) {
-    let specificNumber = parseInt(key) + 1
-    elems[key].querySelector('.disabled').innerHTML = specificNumber
-  }
-}
-const save = (elemSelector, name,button, quality = 3 ) => {
-  let element = document.querySelector(elemSelector)
-  html2canvas(element, {scale: quality, allowTaint : true})
-  .then(canvas => {
-    let pdf = new jsPDF('p', 'mm', 'a4')
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', -1, -1, 212, 299)
-    pdf.save(name+'.pdf')
-    button.classList.remove('d-none')
-    button.nextElementSibling.classList.add('d-none')
-  })
-}
-const validFileType = (file) => {
-  const fileTypes = [
-    'image/gif',
-    'image/x-icon',
-    'image/jpeg',
-    'image/png',
-    'image/svg+xml',
-    'image/tiff'
-  ]
-  for(var i = 0; i < fileTypes.length; i++) {
-    if(file.type === fileTypes[i]) {
-      return true;
-    }
-  }
-  return false;
-}
-const returnFileSize = (number) => {
-  if(number < 1024) {
-    return number + ' octets';
-  }
-  else if(number >= 1024 && number < 1048576) {
-    return (number/1024).toFixed(1) + ' Ko';
-  } 
-  else if(number >= 1048576) {
-    return (number/1048576).toFixed(1) + ' Mo';
-  }
-}
-/**
-*   Dom Generation Variables
+*   II.Dom Generation Variables
 */
 let numberOfElem = 0
 // DOM Generation
@@ -216,9 +118,137 @@ productRow.appendChild(productNameInvoice)
 productRow.appendChild(productQtyInvoice)
 
 /**
-*   Date Range Picker
+*   III. Functions
 */
 
+// Show an element depending of selected option
+const showInputFromSelect = (select, elemToDisplay, array) => {
+  if (array.includes(select.value)) {
+    elemToDisplay.classList.remove('d-none')
+  }
+  else{
+    elemToDisplay.classList.add('d-none')
+  }
+}
+// Display an element depending of a checkbox
+const showInputFromCheckbox = (input, elemToDisplay) => {
+  if (input.checked) {
+    elemToDisplay.classList.remove('d-none')
+  }
+  else{
+    elemToDisplay.classList.add('d-none')
+  }
+}
+// Calculate TTC
+const calcTTC = (ht, tva) => {
+  ht = parseFloat(ht)
+  tva = 1 + parseFloat(tva)
+  return ht * tva
+}
+// Calculate HT
+const calcHT = (ttc, tva) => {
+  ttc = parseFloat(ttc)
+  tva = parseFloat(tva)
+  return ttc / (1+tva)
+
+}
+// return the tva percent
+const returnTva = () => {
+  // if it's others calculate it
+  if (tvaSelectInput.value == 'other') {
+    return parseFloat(tvaOtherInput.value) / 100
+  }
+  else{
+    return tvaSelectInput.value
+  }
+}
+// Add an element to the form 
+const addElemToForm = () => {
+  let elemForm = formRow.cloneNode(true)
+  let elemInvoice = productRow.cloneNode(true)
+  // set elem number
+  let specificNumber = parseInt(numberOfElem) + 1
+  elemForm.querySelector('.disabled').innerHTML = specificNumber
+  // append
+  elemContainerForm.appendChild(elemForm)
+  productContainerInvoice.appendChild(elemInvoice)
+  // increment
+  numberOfElem++
+  // delete on click 
+  elemForm.querySelector('i').addEventListener('click', () => {
+    elemForm.remove()
+    elemInvoice.remove()
+    sortElemNumber()
+  })
+  let nameInput = elemForm.querySelector('input[type=text]')
+  let qtyInput = elemForm.querySelector('input[type=number]')
+  // On type => transfer to invoice
+  nameInput.addEventListener('input', () => {
+    elemInvoice.querySelector('.description').innerHTML = nameInput.value
+  })
+  qtyInput.addEventListener('input', () => {
+    elemInvoice.querySelector('.qty').innerHTML = qtyInput.value
+  })
+}
+// Sort elems on delete
+const sortElemNumber = () => {
+  numberOfElem--
+  let elems = [...elemContainerForm.querySelectorAll('.form-row')]
+  for (const key in elems) {
+    let specificNumber = parseInt(key) + 1
+    elems[key].querySelector('.disabled').innerHTML = specificNumber
+  }
+}
+// Save the invoice
+const save = (elemSelector, name,button, quality = 3 ) => {
+  let element = document.querySelector(elemSelector)
+  // Make a screenshot
+  html2canvas(element, {scale: quality, allowTaint : true})
+  .then(canvas => {
+    // create the PDF
+    let pdf = new jsPDF('p', 'mm', 'a4')
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', -1, -1, 212, 299)
+    pdf.save(name+'.pdf')
+    button.classList.remove('d-none')
+    button.nextElementSibling.classList.add('d-none')
+  })
+}
+// validate a file typee
+const validFileType = (file) => {
+  const fileTypes = [
+    'image/gif',
+    'image/x-icon',
+    'image/jpeg',
+    'image/png',
+    'image/svg+xml',
+    'image/tiff'
+  ]
+  for(var i = 0; i < fileTypes.length; i++) {
+    if(file.type === fileTypes[i]) {
+      return true;
+    }
+  }
+  return false;
+}
+// Return a file Size
+const returnFileSize = (number) => {
+  if(number < 1024) {
+    return number + ' octets';
+  }
+  else if(number >= 1024 && number < 1048576) {
+    return (number/1024).toFixed(1) + ' Ko';
+  } 
+  else if(number >= 1048576) {
+    return (number/1048576).toFixed(1) + ' Mo';
+  }
+}
+
+
+
+/**
+*   IV. Date Range Picker
+*/
+// init the date range picker
 $(dateInput).daterangepicker({
   singleDatePicker: true,
   opens: "center",
@@ -252,13 +282,42 @@ $(dateInput).daterangepicker({
 })
 // Init 
 dateInvoice.innerHTML = `Date :  ${dateInput.value}`
+// On change apply to invoice
 $(dateInput).on('apply.daterangepicker', function(ev, picker) {
   dateInvoice.innerHTML = `Date :  ${picker.endDate.format('DD/MM/YYYY')}`
 });
 
+/**
+ *   V. Logo
+ */
+// On logo addeed to input
+logoInput.addEventListener('change', () => {
+  // check if logo
+  if (logoInput.files.length != 0) {
+    // check logo type
+    if (validFileType(logoInput.files[0])) {
+      // display logo infos
+      fileContainer.classList.remove('d-none')
+      // Set name and size
+      nameSpan.innerHTML = logoInput.files[0].name
+      sizeSpan.innerHTML = returnFileSize(logoInput.files[0].size)
+      // Create image
+      let img = new Image()
+      logoContainer.appendChild(img)
+      // append in preview
+      img.src = window.URL.createObjectURL(logoInput.files[0]);
+    }
+  }
+  // erase input
+  else{
+    fileContainer.classList.add('d-none')
+    // remove img
+    logoContainer.querySelector('img').remove()
+  }
+})
 
 /**
-*   Form Add Invoice
+*   VI. Preview Invoice
 */
 // init
 showInputFromCheckbox(tvaCheckbox, totalTTCContainer)
@@ -307,7 +366,7 @@ totalHTInput.addEventListener('input', () => {
   }
 })
 
-// Add input value to preview
+// Add value inputs on user keywords input to preview
 companyNameInput.addEventListener('input', () => {
   companyNameInvoice.innerHTML = `${companyNameInput.value}`
 })
@@ -329,7 +388,6 @@ countryInput.addEventListener('input', () => {
 addressInput.addEventListener('input',() => {
   addressInvoice.innerHTML = `${addressInput.value}`
 })
-
 companySenderInput.addEventListener('input', () => {
   companyNameSenderInvoice.innerHTML = `${companySenderInput.value}`
 })
@@ -351,8 +409,6 @@ countrySenderInput.addEventListener('input', () => {
 addressSenderInput.addEventListener('input',() => {
   addressSenderInvoice.innerHTML = `${addressSenderInput.value}`
 })
-
-
 tvaNumberInput.addEventListener('input',() => {
   tvaNumberinvoice.innerHTML = `${tvaNumberInput.value}`
 })
@@ -379,13 +435,18 @@ companySenderInput.addEventListener('input',() => {
 })
 
 // Add Elem
-
 addElemButton.addEventListener('click', () => {
   addElemToForm(numberOfElem)
 })
 
+/**
+ *  VII.Create Form
+ */
+// on submmit Form
 invoiceGeneratorInvoice.addEventListener('submit', (e) => {
+  // Don't submit the form
   e.preventDefault()
+  // if there is at least one element
   if (elemContainerForm.querySelector('.form-row')) {
     saveInvoiceButton.classList.add('d-none')
     saveInvoiceButton.nextElementSibling.classList.remove('d-none')
@@ -394,31 +455,13 @@ invoiceGeneratorInvoice.addEventListener('submit', (e) => {
     setTimeout(() => {
       save('.preview-container .preview',numberInvoiceInput.value, saveInvoiceButton)
     }, 2500);
-
   }
+  // Else show popover to say to add an element
   else{
     $(addElemButton).popover('enable')
     $(addElemButton).popover('show')
     setTimeout(() => {
     $(addElemButton).popover('hide')
     }, 2000);
-  }
-})
-/**
- *   Logo
- */
-logoInput.addEventListener('change', () => {
-  if (logoInput.files.length != 0) {
-    if (validFileType(logoInput.files[0])) {
-      fileContainer.classList.remove('d-none')
-      nameSpan.innerHTML = logoInput.files[0].name
-      sizeSpan.innerHTML = returnFileSize(logoInput.files[0].size)
-      let img = new Image()
-      logoContainer.appendChild(img)
-      img.src = window.URL.createObjectURL(logoInput.files[0]);
-    }
-  }
-  else{
-    fileContainer.classList.add('d-none')
   }
 })
